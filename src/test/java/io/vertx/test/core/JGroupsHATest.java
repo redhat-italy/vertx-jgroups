@@ -33,7 +33,7 @@ public class JGroupsHATest extends HATest {
   }
 
   @Test
-  public void testFailed_QuorumLost() throws Exception {
+  public void testFailedQuorumLost() throws Exception {
     Vertx vertx1 = startVertx(3);
     Vertx vertx2 = startVertx(3);
     Vertx vertx3 = startVertx(3);

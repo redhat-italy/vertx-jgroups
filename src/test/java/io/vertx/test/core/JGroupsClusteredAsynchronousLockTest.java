@@ -23,29 +23,8 @@ import org.junit.Test;
 
 public class JGroupsClusteredAsynchronousLockTest extends ClusteredAsynchronousLockTest {
 
-    @Override
-    protected ClusterManager getClusterManager() {
-        return new JGroupsClusterManager();
-    }
-
-
-  @Test
-  public void testAcquireMio() {
-    getVertx().sharedData().getLock("foo", ar -> {
-      assertTrue(ar.succeeded());
-      long start = System.currentTimeMillis();
-      Lock lock = ar.result();
-      vertx.setTimer(1000, tid -> {
-        lock.release();
-      });
-      getVertx().sharedData().getLock("foo", ar2 -> {
-        assertTrue(ar2.succeeded());
-        // Should be delayed
-        assertTrue(System.currentTimeMillis() - start >= 1000);
-        testComplete();
-      });
-    });
-    await();
+  @Override
+  protected ClusterManager getClusterManager() {
+    return new JGroupsClusterManager();
   }
-
 }
