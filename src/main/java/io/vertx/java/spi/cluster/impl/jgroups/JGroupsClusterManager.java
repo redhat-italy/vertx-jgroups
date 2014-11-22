@@ -41,7 +41,6 @@ public class JGroupsClusterManager implements ClusterManager, LambdaLogger {
   private volatile boolean active;
   private String address;
   private TopologyListener topologyListener;
-  private long topologyTriggerId;
 
   @Override
   public void setVertx(VertxSPI vertx) {
@@ -50,12 +49,18 @@ public class JGroupsClusterManager implements ClusterManager, LambdaLogger {
 
   @Override
   public <K, V> void getAsyncMultiMap(String name, MapOptions options, Handler<AsyncResult<AsyncMultiMap<K, V>>> handler) {
+    if (LOG.isTraceEnabled()) {
+      LOG.trace(String.format("Create new AsyncMultiMap [%s] on address [%s]", name, address));
+    }
     checkCluster(handler);
     cacheManager.createAsyncMultiMap(name, handler);
   }
 
   @Override
   public <K, V> void getAsyncMap(String name, MapOptions options, Handler<AsyncResult<AsyncMap<K, V>>> handler) {
+    if (LOG.isTraceEnabled()) {
+      LOG.trace(String.format("Create new AsyncMap [%s] on address [%s]", name, address));
+    }
     checkCluster(handler);
     cacheManager.createAsyncMap(name, handler);
   }
@@ -67,6 +72,9 @@ public class JGroupsClusterManager implements ClusterManager, LambdaLogger {
 
   @Override
   public void getLockWithTimeout(String name, long timeout, Handler<AsyncResult<Lock>> handler) {
+    if (LOG.isTraceEnabled()) {
+      LOG.trace(String.format("Create new Lock [%s] on address [%s]", name, address));
+    }
     checkCluster(handler);
     vertx.executeBlocking(
         () -> {
@@ -85,6 +93,9 @@ public class JGroupsClusterManager implements ClusterManager, LambdaLogger {
 
   @Override
   public void getCounter(String name, Handler<AsyncResult<Counter>> handler) {
+    if (LOG.isTraceEnabled()) {
+      LOG.trace(String.format("Create new counter [%s] on address [%s]", name, address));
+    }
     checkCluster(handler);
     vertx.executeBlocking(
         () -> new ClusteredCounterImpl(vertx, counterService.getOrCreateCounter(name, 0L)),
@@ -99,12 +110,17 @@ public class JGroupsClusterManager implements ClusterManager, LambdaLogger {
 
   @Override
   public List<String> getNodes() {
-    System.out.println("[" + address + "] - Channel view [" + channel.getViewAsString() + "]");
+    if (LOG.isTraceEnabled()) {
+      LOG.trace(String.format("GetNodes on address [%s] with channel view [%s]", address, channel.getViewAsString()));
+    }
     return topologyListener.getNodes();
   }
 
   @Override
   public void nodeListener(NodeListener listener) {
+    if (LOG.isTraceEnabled()) {
+      LOG.trace(String.format("Set nodeListener [%s] on address [%s]", listener, address));
+    }
     topologyListener.setNodeListener(listener);
   }
 
@@ -118,13 +134,15 @@ public class JGroupsClusterManager implements ClusterManager, LambdaLogger {
 
       try {
         channel = new JChannel("jgroups-udp.xml");
-        topologyListener = new TopologyListener(vertx, UUID.randomUUID().toString());
+        topologyListener = new TopologyListener(vertx);
         channel.setReceiver(topologyListener);
         channel.connect(CLUSTER_NAME);
 
         address = channel.getAddressAsString();
 
-        logInfo(() -> String.format("Node id=%s join the cluster", address));
+        if(LOG.isInfoEnabled()) {
+          LOG.info(String.format("Node id [%s] join the cluster", this.getNodeID()));
+        }
 
         counterService = new CounterService(channel);
         lockService = new LockService(channel);
@@ -132,11 +150,6 @@ public class JGroupsClusterManager implements ClusterManager, LambdaLogger {
         cacheManager = new CacheManager(vertx, channel);
         cacheManager.start();
 
-        topologyTriggerId = vertx.setPeriodic(100, (id) -> {
-          if (active) {
-            topologyListener.viewAccepted(channel.getView());
-          }
-        });
         return null;
       } catch (Exception e) {
         active = false;
@@ -153,9 +166,9 @@ public class JGroupsClusterManager implements ClusterManager, LambdaLogger {
       }
       active = false;
 
-      vertx.cancelTimer(topologyTriggerId);
-
-      logInfo(() -> String.format("Node id=%s leave the cluster", this.getNodeID()));
+      if(LOG.isInfoEnabled()) {
+        LOG.info(String.format("Node id [%s] leave the cluster", this.getNodeID()));
+      }
 
       channel.close();
 

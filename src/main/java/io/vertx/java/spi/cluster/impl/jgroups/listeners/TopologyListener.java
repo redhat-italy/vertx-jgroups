@@ -36,33 +36,33 @@ import java.util.stream.Collectors;
 public class TopologyListener extends ReceiverAdapter implements LambdaLogger {
 
   private final static Logger LOG = LoggerFactory.getLogger(TopologyListener.class);
-  private final String name;
   private final VertxSPI vertx;
 
   private ViewId viewId;
   private List<Address> members = Collections.emptyList();
   private Optional<NodeListener> nodeListener = Optional.empty();
 
-  public TopologyListener(VertxSPI vertx, String name) {
-    logDebug(() -> "[" + name + "] - Start topology listener");
+  public TopologyListener(VertxSPI vertx) {
     this.vertx = vertx;
-    this.name = name;
   }
 
   @Override
   public void receive(Message msg) {
-    System.out.println("[" + name + "] Message receive [" + msg + "]");
+    System.out.println("Message receive [" + msg + "]");
   }
 
   @Override
   public void viewAccepted(View view) {
+//    logInfo(() -> "[" + name + "] - Called View accepted [" + view + "]");
+    System.out.println("Called View accepted [" + view + "]");
+
     if (view.getViewId() == null) {
-      logTrace(() -> "[" + name + "] - Called View accepted [" + view + "] with ViewId null.");
+      logTrace(() -> "Called View accepted [" + view + "] with ViewId null.");
       return;
     }
 
     if (viewId != null && view.getViewId().compareToIDs(viewId) <= 0) {
-      logTrace(() -> "[" + name + "] - Called View accepted [" + view + "] but there's no changes.");
+      logTrace(() -> "Called View accepted [" + view + "] but there's no changes.");
       return;
     }
     List<Address> oldMembers = members;
@@ -75,12 +75,12 @@ public class TopologyListener extends ReceiverAdapter implements LambdaLogger {
       Predicate<Address> oldMemberNodeHasLeft = (member) -> !newMembers.contains(member);
       Predicate<Address> newMemberNodeJoin = (member) -> !oldMembers.contains(member);
       Consumer<Address> nodeJoin = (member) -> {
-        logInfo(() -> "[" + name + "] - Notify node [" + member + "] has joined the cluster");
+        logInfo(() -> "Notify node [" + member + "] has joined the cluster");
         listener.nodeAdded(member.toString());
       };
       Consumer<Address> nodeLeft = (member) -> {
-        logInfo(() -> "[" + name + "] - Notify node [" + member + "] has left the cluster");
-        listener.nodeAdded(member.toString());
+        logInfo(() -> "Notify node [" + member + "] has left the cluster");
+        listener.nodeLeft(member.toString());
       };
 
       newMembers.stream()
@@ -95,12 +95,12 @@ public class TopologyListener extends ReceiverAdapter implements LambdaLogger {
   }
 
   public void setNodeListener(NodeListener nodeListener) {
-    logDebug(() -> "[" + name + "] - Set topology listener [" + nodeListener + "]");
+    logDebug(() -> "Set topology listener [" + nodeListener + "]");
     this.nodeListener = Optional.of(nodeListener);
   }
 
   public List<String> getNodes() {
-    logDebug(() -> "[" + name + "] - Get Nodes from topology [" + members + "]");
+    logDebug(() -> "Get Nodes from topology [" + members + "]");
     return members
         .stream()
         .map(Address::toString)

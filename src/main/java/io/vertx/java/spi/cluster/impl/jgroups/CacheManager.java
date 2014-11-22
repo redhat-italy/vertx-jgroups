@@ -15,6 +15,7 @@ import io.vertx.java.spi.cluster.impl.jgroups.domain.async.AsyncMultiMapWrapper;
 import io.vertx.java.spi.cluster.impl.jgroups.domain.MultiMapImpl;
 import io.vertx.java.spi.cluster.impl.jgroups.services.*;
 import io.vertx.java.spi.cluster.impl.jgroups.support.LambdaLogger;
+import io.vertx.java.spi.cluster.impl.jgroups.support.MultiPlexReceiver;
 import org.jgroups.*;
 import org.jgroups.blocks.RpcDispatcher;
 
@@ -46,7 +47,11 @@ public class CacheManager extends ReceiverAdapter implements LambdaLogger {
     this.mapService = new DefaultRpcMapService(maps);
 
     RpcServerObjDelegate server_obj = new RpcServerObjDelegate(mapService, multiMapService);
-    this.dispatcher = new RpcDispatcher(this.channel, this, null, server_obj);
+    // Don't want to loose the channell receiver.
+    MultiPlexReceiver multiPlexReceiver = new MultiPlexReceiver();
+    multiPlexReceiver.addReceiver(channel.getReceiver());
+    multiPlexReceiver.addReceiver(this);
+    this.dispatcher = new RpcDispatcher(this.channel, multiPlexReceiver, multiPlexReceiver, server_obj);
     this.dispatcher.setMethodLookup(server_obj.getMethodLookup());
 
     this.executorService = new DefaultRpcExecutorService(vertx, dispatcher);
@@ -90,8 +95,9 @@ public class CacheManager extends ReceiverAdapter implements LambdaLogger {
 
   @Override
   public void getState(OutputStream output) throws Exception {
-    System.out.println("CacheManager.getState");
-    System.out.println("output = [" + output + "]");
+    if(LOG.isTraceEnabled()) {
+      LOG.trace("CacheManager create state");
+    }
     try (BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(output, 1024);
          ObjectOutputStream oos = new ObjectOutputStream(bufferedOutputStream)) {
       oos.writeObject(multiMaps);
@@ -102,8 +108,9 @@ public class CacheManager extends ReceiverAdapter implements LambdaLogger {
 
   @Override
   public void setState(InputStream input) throws Exception {
-    System.out.println("CacheManager.setState");
-    System.out.println("input = [" + input + "]");
+    if(LOG.isTraceEnabled()) {
+      LOG.trace(String.format("CacheManager.setState with input [%s]", input));
+    }
     try (ObjectInputStream oos = new ObjectInputStream(input)) {
       multiMaps.putAll((Map<String, MultiMapImpl>) oos.readObject());
       maps.putAll((Map<String, Map>) oos.readObject());

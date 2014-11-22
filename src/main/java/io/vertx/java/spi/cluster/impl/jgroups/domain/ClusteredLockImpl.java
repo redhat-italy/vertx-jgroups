@@ -35,7 +35,7 @@ public class ClusteredLockImpl implements io.vertx.core.shareddata.Lock {
   public boolean acquire(long timeout) {
     try {
       if (log.isDebugEnabled()) {
-        log.debug(String.format("Aquire lock on [%s] with timeout [%d]", lock, timeout));
+        log.debug(String.format("Acquire lock on [%s] with timeout [%d]", lock, timeout));
       }
       return lock.tryLock(timeout, TimeUnit.MILLISECONDS);
     } catch (InterruptedException e) {
