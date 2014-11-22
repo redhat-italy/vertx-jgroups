@@ -16,9 +16,7 @@ import org.jgroups.util.Rsp;
 import org.jgroups.util.RspList;
 
 import java.util.Optional;
-import java.util.StringJoiner;
 import java.util.function.Supplier;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class DefaultRpcExecutorService implements RpcExecutorService, LambdaLogger {
@@ -41,33 +39,33 @@ public class DefaultRpcExecutorService implements RpcExecutorService, LambdaLogg
 
   @Override
   public <T> void remoteExecute(MethodCall action, Handler<AsyncResult<T>> handler) {
-    logTrace(() -> "DefaultRpcExecutorService.remoteExecute action [" + action + "], handler [" + handler + "]");
+    logTrace(() -> String.format("RemoteExecute action %s, handler %s", action, handler));
     this.<T>asyncExecute(() -> this.<T>execute(action), handler);
   }
 
   @Override
   public <T> void asyncExecute(Supplier<T> action, Handler<AsyncResult<T>> handler) {
-    logTrace(() -> "DefaultRpcExecutorService.asyncExecute action [" + action + "], handler [" + handler + "]");
+    logTrace(() -> String.format("AsyncExecute action %s, handler %s", action.toString(), handler.toString()));
     vertx.executeBlocking(action::get, handler);
   }
 
   private <T> T execute(MethodCall action) {
-    if (LOG.isTraceEnabled()) {
-      LOG.trace(String.format("execute action [%s]", action.toStringDetails()));
-    }
+    logTrace(() -> String.format("Execute action [%s]", action.toStringDetails()));
     RspList<T> responses;
     try {
       responses = this.<T>broadDispatch(action, REQUEST_OPTIONS_BLOCKING);
     } catch (Exception e) {
       throw new VertxException(e);
     }
-    if (LOG.isTraceEnabled()) {
+
+    logTrace(() -> {
       String values = responses.values().stream()
           .map(Rsp::toString)
           .collect(Collectors.joining(", ", "[", "]"));
 
-      LOG.trace(String.format("Response from method execution %s", values));
-    }
+      return String.format("Response from method execution %s", values);
+    });
+
     Optional<Rsp<T>> optional = responses.values().stream()
         .filter(Rsp::hasException)
         .findFirst();
@@ -78,7 +76,7 @@ public class DefaultRpcExecutorService implements RpcExecutorService, LambdaLogg
   }
 
   private <T> RspList<T> broadDispatch(MethodCall action, RequestOptions options) throws Exception {
-    logTrace(() -> "DefaultRpcExecutorService.broadDispatch action [" + action.toStringDetails() + "], options [" + options + "]");
+    logTrace(() -> String.format("BroadDispatch action [%s] - options [%s]", action.toStringDetails(), options.toString()));
     return dispatcher.callRemoteMethods(null, action, options);
   }
 

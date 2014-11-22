@@ -53,9 +53,6 @@ public class TopologyListener extends ReceiverAdapter implements LambdaLogger {
 
   @Override
   public void viewAccepted(View view) {
-//    logInfo(() -> "[" + name + "] - Called View accepted [" + view + "]");
-    System.out.println("Called View accepted [" + view + "]");
-
     if (view.getViewId() == null) {
       logTrace(() -> "Called View accepted [" + view + "] with ViewId null.");
       return;
@@ -65,6 +62,8 @@ public class TopologyListener extends ReceiverAdapter implements LambdaLogger {
       logTrace(() -> "Called View accepted [" + view + "] but there's no changes.");
       return;
     }
+
+    logTrace(() -> String.format("Called View accepted [%s]", view));
     List<Address> oldMembers = members;
     members = view.getMembers();
     viewId = view.getViewId().copy();

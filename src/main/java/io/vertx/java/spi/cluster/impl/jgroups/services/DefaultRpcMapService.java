@@ -29,12 +29,6 @@ public class DefaultRpcMapService implements RpcMapService, LambdaLogger {
 
   public <K, V, R> R executeAndReturn(String name, Function<Map<K, V>, R> function) {
     return function.apply((Map<K, V>) maps.computeIfAbsent(name, (k) -> new ConcurrentHashMap()));
-/*
-    Map map = Optional
-        .ofNullable(maps.get(name))
-        .orElseThrow(() -> new IllegalStateException(String.format("Map [%s] not found.", name)));
-    return function.apply((Map<K, V>) map);
-*/
   }
 
   public <K, V> Map<K, V> mapGet(String name) {
