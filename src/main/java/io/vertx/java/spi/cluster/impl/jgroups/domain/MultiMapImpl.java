@@ -19,7 +19,7 @@ public class MultiMapImpl<K, V> implements Externalizable {
   }
 
   public void add(K k, V v) {
-    if(log.isTraceEnabled()) {
+    if (log.isTraceEnabled()) {
       log.trace("MultiMapImpl.add k = [" + k + "], v = [" + v + "]");
     }
     cache.compute(k, (key, oldValue) ->
@@ -31,14 +31,14 @@ public class MultiMapImpl<K, V> implements Externalizable {
 
   public ImmutableChoosableSet<V> get(K k) {
     ImmutableChoosableSet<V> v = cache.get(k);
-    if(log.isTraceEnabled()) {
+    if (log.isTraceEnabled()) {
       log.trace("MultiMapImpl.get k = [" + k + "], v = [" + v + "]");
     }
     return v;
   }
 
   public boolean remove(K k, V v) {
-    if(log.isTraceEnabled()) {
+    if (log.isTraceEnabled()) {
       log.trace("MultiMapImpl.remove k = [" + k + "], v = [" + v + "]");
     }
     final boolean[] result = {false};
@@ -47,6 +47,13 @@ public class MultiMapImpl<K, V> implements Externalizable {
       return oldValue.remove(v);
     });
     return result[0];
+  }
+
+  public void removeAll(V v) {
+    if (log.isTraceEnabled()) {
+      log.trace("MultiMapImpl.removeAll v = [" + v + "]");
+    }
+    cache.replaceAll((k, oldValue) -> oldValue.remove(v));
   }
 
   @Override

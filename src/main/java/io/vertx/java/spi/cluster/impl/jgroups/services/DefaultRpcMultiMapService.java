@@ -3,6 +3,7 @@ package io.vertx.java.spi.cluster.impl.jgroups.services;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.java.spi.cluster.impl.jgroups.domain.MultiMapImpl;
+import io.vertx.java.spi.cluster.impl.jgroups.support.DataHolder;
 import io.vertx.java.spi.cluster.impl.jgroups.support.LambdaLogger;
 
 import java.util.Map;
@@ -27,26 +28,35 @@ public class DefaultRpcMultiMapService implements RpcMultiMapService, LambdaLogg
   }
 
   public <K, V> MultiMapImpl<K, V> multiMapGet(String name) {
+    logDebug(() -> String.format("method multiMapGet name[%s]", name));
     return this.<K, V, MultiMapImpl<K,V>>executeAndReturn(name, Function.identity());
   }
 
   public boolean multiMapCreate(String name) {
-    logTrace(() -> String.format("method mapCreate name[%s]", name));
+    logDebug(() -> String.format("method multiMapCreate name[%s]", name));
     maps.computeIfAbsent(name, (key) -> new MultiMapImpl());
     return true;
   }
 
-  public <K, V> void multiMapAdd(String name, K k, V v) {
-    logTrace(() -> String.format("method multiMapAdd name[%s] key[%s] value[%s]", name, k, v));
+  public <K, V> void multiMapAdd(String name, DataHolder<K> k, DataHolder<V> v) {
+    logDebug(() -> String.format("method multiMapAdd name[%s] key[%s] value[%s]", name, k, v));
     this.<K, V, Void>executeAndReturn(name, (map) -> {
-      map.add(k, v);
+      map.add(k.unwrap(), v.unwrap());
       return null;
     });
   }
 
-  public <K, V> boolean multiMapRemove(String name, K k, V v) {
-    logTrace(() -> String.format("method multiMapRemove name[%s] key[%s] value[%s]", name, k, v));
-    return this.<K, V, Boolean>executeAndReturn(name, (map) -> map.remove(k, v));
+  public <K, V> boolean multiMapRemove(String name, DataHolder<K> k, DataHolder<V> v) {
+    logDebug(() -> String.format("method multiMapRemove name[%s] key[%s] value[%s]", name, k, v));
+    return this.<K, V, Boolean>executeAndReturn(name, (map) -> map.remove(k.unwrap(), v.unwrap()));
+  }
+
+  public <K, V> void multiMapRemoveAll(String name, DataHolder<V> v) {
+    logDebug(() -> String.format("method multiMapRemoveAll name[%s] value[%s]", name, v));
+    this.<K, V, Void>executeAndReturn(name, (map) -> {
+      map.removeAll(v.unwrap());
+      return null;
+    });
   }
 
   @Override

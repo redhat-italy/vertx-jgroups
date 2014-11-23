@@ -50,8 +50,8 @@ public class AsyncMultiMapWrapper<K, V> implements AsyncMultiMap<K, V>, LambdaLo
   }
 
   @Override
-  public void removeAllForValue(V v, Handler<AsyncResult<Void>> completionHandler) {
-    throw new VertxException(new UnsupportedOperationException("Not yet implemented."));
+  public void removeAllForValue(V v, Handler<AsyncResult<Void>> handler) {
+    executorService.<Void>remoteExecute(RpcServerObjDelegate.CALL_MULTIMAP_REMOVE_ALL.method(name, v), handler);
   }
 
   @Override

@@ -6,6 +6,7 @@ import io.vertx.core.VertxException;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.core.spi.cluster.VertxSPI;
+import io.vertx.java.spi.cluster.impl.jgroups.support.DataHolder;
 import io.vertx.java.spi.cluster.impl.jgroups.support.LambdaLogger;
 import org.jgroups.Message;
 import org.jgroups.blocks.MethodCall;
@@ -51,9 +52,9 @@ public class DefaultRpcExecutorService implements RpcExecutorService, LambdaLogg
 
   private <T> T execute(MethodCall action) {
     logTrace(() -> String.format("Execute action [%s]", action.toStringDetails()));
-    RspList<T> responses;
+    RspList<Object> responses;
     try {
-      responses = this.<T>broadDispatch(action, REQUEST_OPTIONS_BLOCKING);
+      responses = this.<Object>broadDispatch(action, REQUEST_OPTIONS_BLOCKING);
     } catch (Exception e) {
       throw new VertxException(e);
     }
@@ -66,13 +67,18 @@ public class DefaultRpcExecutorService implements RpcExecutorService, LambdaLogg
       return String.format("Response from method execution %s", values);
     });
 
-    Optional<Rsp<T>> optional = responses.values().stream()
+    Optional<Rsp<Object>> optional = responses.values().stream()
         .filter(Rsp::hasException)
         .findFirst();
     if (optional.isPresent()) {
       throw new VertxException(optional.get().getException());
     }
-    return responses.getFirst();
+    Object response = responses.getFirst();
+    if (DataHolder.class.isInstance(response)) {
+      return ((DataHolder<T>) response).unwrap();
+    } else {
+      return (T) response;
+    }
   }
 
   private <T> RspList<T> broadDispatch(MethodCall action, RequestOptions options) throws Exception {

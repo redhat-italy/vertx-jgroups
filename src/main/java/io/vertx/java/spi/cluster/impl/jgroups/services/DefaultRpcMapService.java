@@ -2,6 +2,7 @@ package io.vertx.java.spi.cluster.impl.jgroups.services;
 
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.impl.LoggerFactory;
+import io.vertx.java.spi.cluster.impl.jgroups.support.DataHolder;
 import io.vertx.java.spi.cluster.impl.jgroups.support.LambdaLogger;
 
 import java.util.Map;
@@ -43,51 +44,51 @@ public class DefaultRpcMapService implements RpcMapService, LambdaLogger {
   }
 
   @Override
-  public <K, V> void mapPut(String name, K k, V v) {
+  public <K, V> void mapPut(String name, DataHolder<K> k, DataHolder<V> v) {
     logDebug(() -> "RpcMapService.put name = [" + name + "], k = [" + k + "], v = [" + v + "]");
-    this.<K, V>execute(name, (map) -> map.put(k, v));
+    this.<K, V>execute(name, (map) -> map.put(k.unwrap(), v.unwrap()));
   }
 
   @Override
-  public <K, V> V mapPutIfAbsent(String name, K k, V v) {
-    logTrace(() -> "RpcMapService.putIfAbsent name = [" + name + "], k = [" + k + "], v = [" + v + "]");
-    return this.<K, V, V>executeAndReturn(name, (map) -> map.putIfAbsent(k, v));
+  public <K, V> DataHolder<V> mapPutIfAbsent(String name, DataHolder<K> k, DataHolder<V> v) {
+    logDebug(() -> "RpcMapService.putIfAbsent name = [" + name + "], k = [" + k + "], v = [" + v + "]");
+    return this.<K, V, DataHolder<V>>executeAndReturn(name, (map) -> DataHolder.wrap(map.putIfAbsent(k.unwrap(), v.unwrap())));
   }
 
   @Override
-  public <K, V> V mapRemove(String name, K k) {
-    logTrace(() -> "RpcMapService.remove name = [" + name + "], k = [" + k + "]");
-    return this.<K, V, V>executeAndReturn(name, (map) -> map.remove(k));
+  public <K, V> DataHolder<V> mapRemove(String name, DataHolder<K> k) {
+    logDebug(() -> "RpcMapService.remove name = [" + name + "], k = [" + k + "]");
+    return this.<K, V, DataHolder<V>>executeAndReturn(name, (map) -> DataHolder.wrap(map.remove(k.unwrap())));
   }
 
   @Override
-  public <K, V> boolean mapRemoveIfPresent(String name, K k, V v) {
-    logTrace(() -> "RpcMapService.removeIfPresent name = [" + name + "], k = [" + k + "], v = [" + v + "]");
-    return this.<K, V, Boolean>executeAndReturn(name, (map) -> map.remove(k, v));
+  public <K, V> boolean mapRemoveIfPresent(String name, DataHolder<K> k, DataHolder<V> v) {
+    logDebug(() -> "RpcMapService.removeIfPresent name = [" + name + "], k = [" + k + "], v = [" + v + "]");
+    return this.<K, V, Boolean>executeAndReturn(name, (map) -> map.remove(k.unwrap(), v.unwrap()));
   }
 
   @Override
-  public <K, V> V mapReplace(String name, K k, V v) {
-    logTrace(() -> "RpcMapService.replace name = [" + name + "], k = [" + k + "], v = [" + v + "]");
-    return this.<K, V, V>executeAndReturn(name, (map) -> map.replace(k, v));
+  public <K, V> DataHolder<V> mapReplace(String name, DataHolder<K> k, DataHolder<V> v) {
+    logDebug(() -> "RpcMapService.replace name = [" + name + "], k = [" + k + "], v = [" + v + "]");
+    return this.<K, V, DataHolder<V>>executeAndReturn(name, (map) -> DataHolder.wrap(map.replace(k.unwrap(), v.unwrap())));
   }
 
   @Override
-  public <K, V> boolean mapReplaceIfPresent(String name, K k, V oldValue, V newValue) {
-    logTrace(() -> "RpcMapService.removeIfPresent name = [" + name + "], k = [" + k + "], oldValue = [" + oldValue + "], newValue = [" + newValue + "]");
-    return this.<K, V, Boolean>executeAndReturn(name, (map) -> map.replace(k, oldValue, newValue));
+  public <K, V> boolean mapReplaceIfPresent(String name, DataHolder<K> k, DataHolder<V> oldValue, DataHolder<V> newValue) {
+    logDebug(() -> "RpcMapService.removeIfPresent name = [" + name + "], k = [" + k + "], oldValue = [" + oldValue + "], newValue = [" + newValue + "]");
+    return this.<K, V, Boolean>executeAndReturn(name, (map) -> map.replace(k.unwrap(), oldValue.unwrap(), newValue.unwrap()));
   }
 
   @Override
   public <K, V> void mapClear(String name) {
-    logTrace(() -> "RpcMapService.clear name = [" + name + "]");
+    logDebug(() -> "RpcMapService.clear name = [" + name + "]");
     this.<K, V>execute(name, (map) -> map.clear());
   }
 
   @Override
-  public <K, V> void mapPutAll(String name, Map<K, V> m) {
-    logTrace(() -> "RpcMapService.mapPutAll name = [" + name + "]");
-    this.execute(name, (map) -> map.putAll(m));
+  public <K, V> void mapPutAll(String name, Map<DataHolder<K>, DataHolder<V>> m) {
+    logDebug(() -> "RpcMapService.mapPutAll name = [" + name + "]");
+    this.execute(name, (map) -> m.forEach((k, v) -> map.put(k.unwrap(), v.unwrap())));
   }
 
   @Override
