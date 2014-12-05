@@ -186,7 +186,7 @@ public class JGroupsClusterManager implements ClusterManager, LambdaLogger {
 
   private <R> void checkCluster(Handler<AsyncResult<R>> handler) {
     if (!active) {
-      handler.handle(Future.completedFuture(new VertxException("Cluster is not active!")));
+      throw new VertxException("Cluster is not active!");
     }
   }
 

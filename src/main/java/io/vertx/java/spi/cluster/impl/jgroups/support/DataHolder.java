@@ -3,7 +3,6 @@ package io.vertx.java.spi.cluster.impl.jgroups.support;
 import io.vertx.core.VertxException;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.shareddata.impl.ClusterSerializable;
-import io.vertx.java.spi.cluster.impl.jgroups.services.RpcServerObjDelegate;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -59,4 +58,5 @@ public class DataHolder<T> implements Externalizable {
       data = (T) in.readObject();
     }
   }
+
 }

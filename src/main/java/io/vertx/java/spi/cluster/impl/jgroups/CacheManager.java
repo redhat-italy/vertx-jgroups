@@ -61,9 +61,9 @@ public class CacheManager extends ReceiverAdapter implements LambdaLogger {
           logDebug(() -> String.format("method created AsyncMultiMap address[%s] name[%s]", channel.getAddressAsString(), name));
           if (result.succeeded()) {
             AsyncMultiMapWrapper<K, V> wrapper = new AsyncMultiMapWrapper<K, V>(name, multiMaps.<String, MultiMapImpl<K, V>>get(name), executorService);
-            handler.handle(Future.completedFuture(wrapper));
+            handler.handle(Future.succeededFuture(wrapper));
           } else {
-            handler.handle(Future.completedFuture(result.cause()));
+            handler.handle(Future.failedFuture(result.cause()));
           }
         });
   }
@@ -74,9 +74,9 @@ public class CacheManager extends ReceiverAdapter implements LambdaLogger {
         (result) -> {
           if (result.succeeded()) {
             AsyncMapWrapper<K, V> wrapper = new AsyncMapWrapper<K, V>(name, maps.<String, Map<K, V>>get(name), vertx, executorService);
-            handler.handle(Future.completedFuture(wrapper));
+            handler.handle(Future.succeededFuture(wrapper));
           } else {
-            handler.handle(Future.completedFuture(result.cause()));
+            handler.handle(Future.failedFuture(result.cause()));
           }
         });
   }
