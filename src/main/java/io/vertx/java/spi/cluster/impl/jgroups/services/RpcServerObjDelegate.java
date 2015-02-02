@@ -25,13 +25,14 @@ public class RpcServerObjDelegate implements RpcMapService, RpcMultiMapService, 
 
   private static final short MAP_CREATE = 20;
   private static final short MAP_PUT = 21;
-  private static final short MAP_PUTALL = 28;
   private static final short MAP_PUTIFABSENT = 22;
   private static final short MAP_REMOVE = 23;
   private static final short MAP_REMOVEIFPRESENT = 24;
   private static final short MAP_REPLACE = 25;
   private static final short MAP_REPLACEIFPRESENT = 26;
   private static final short MAP_CLEAR = 27;
+  private static final short MAP_PUTALL = 28;
+  private static final short MAP_PUT_TIMEOUT = 29;
 
   public static final MethodCallInterface.OneParameter CALL_MULTIMAP_CREATE = (name) -> new MethodCall(MULTIMAP_CREATE, name);
   public static final MethodCallInterface.ThreeParameters CALL_MULTIMAP_ADD = (name, p1, p2) -> new MethodCall(MULTIMAP_ADD, name, DataHolder.wrap(p1), DataHolder.wrap(p2));

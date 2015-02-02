@@ -9,7 +9,6 @@ import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.core.shareddata.AsyncMap;
 import io.vertx.core.shareddata.Counter;
 import io.vertx.core.shareddata.Lock;
-import io.vertx.core.shareddata.MapOptions;
 import io.vertx.core.spi.cluster.*;
 import io.vertx.java.spi.cluster.impl.jgroups.domain.ClusteredLockImpl;
 import io.vertx.java.spi.cluster.impl.jgroups.domain.ClusteredCounterImpl;
@@ -48,7 +47,7 @@ public class JGroupsClusterManager implements ClusterManager, LambdaLogger {
   }
 
   @Override
-  public <K, V> void getAsyncMultiMap(String name, MapOptions options, Handler<AsyncResult<AsyncMultiMap<K, V>>> handler) {
+  public <K, V> void getAsyncMultiMap(String name, Handler<AsyncResult<AsyncMultiMap<K, V>>> handler) {
     if (LOG.isTraceEnabled()) {
       LOG.trace(String.format("Create new AsyncMultiMap [%s] on address [%s]", name, address));
     }
@@ -57,7 +56,7 @@ public class JGroupsClusterManager implements ClusterManager, LambdaLogger {
   }
 
   @Override
-  public <K, V> void getAsyncMap(String name, MapOptions options, Handler<AsyncResult<AsyncMap<K, V>>> handler) {
+  public <K, V> void getAsyncMap(String name, Handler<AsyncResult<AsyncMap<K, V>>> handler) {
     if (LOG.isTraceEnabled()) {
       LOG.trace(String.format("Create new AsyncMap [%s] on address [%s]", name, address));
     }

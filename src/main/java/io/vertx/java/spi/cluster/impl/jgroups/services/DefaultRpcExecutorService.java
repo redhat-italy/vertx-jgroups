@@ -23,7 +23,8 @@ import java.util.stream.Collectors;
 public class DefaultRpcExecutorService implements RpcExecutorService, LambdaLogger {
 
   private static final Logger LOG = LoggerFactory.getLogger(DefaultRpcExecutorService.class);
-  private static final RequestOptions REQUEST_OPTIONS_BLOCKING = new RequestOptions().setFlags(Message.Flag.NO_TOTAL_ORDER).setMode(ResponseMode.GET_ALL);
+//  private static final RequestOptions REQUEST_OPTIONS_BLOCKING = new RequestOptions().setFlags(Message.Flag.NO_TOTAL_ORDER).setMode(ResponseMode.GET_ALL);
+  private static final Message.Flag[] JGROUPS_FLAGS = new Message.Flag[] {Message.Flag.NO_TOTAL_ORDER};
 
   private final VertxSPI vertx;
   private final RpcDispatcher dispatcher;
@@ -35,13 +36,23 @@ public class DefaultRpcExecutorService implements RpcExecutorService, LambdaLogg
 
   @Override
   public <T> T remoteExecute(MethodCall action) {
-    return this.execute(action);
+    return this.execute(action, 0);
+  }
+
+  @Override
+  public <T> T remoteExecute(MethodCall action, long timeout) {
+    return this.execute(action, timeout);
   }
 
   @Override
   public <T> void remoteExecute(MethodCall action, Handler<AsyncResult<T>> handler) {
+    this.<T>remoteExecute(action, 0, handler);
+  }
+
+  @Override
+  public <T> void remoteExecute(MethodCall action, long timeout, Handler<AsyncResult<T>> handler) {
     logTrace(() -> String.format("RemoteExecute action %s, handler %s", action, handler));
-    this.<T>asyncExecute(() -> this.<T>execute(action), handler);
+    this.<T>asyncExecute(() -> this.<T>execute(action, timeout), handler);
   }
 
   @Override
@@ -50,11 +61,15 @@ public class DefaultRpcExecutorService implements RpcExecutorService, LambdaLogg
     vertx.executeBlocking(action::get, handler);
   }
 
-  private <T> T execute(MethodCall action) {
+  private <T> T execute(MethodCall action, long timeout) {
     logTrace(() -> String.format("Execute action [%s]", action.toStringDetails()));
     RspList<Object> responses;
     try {
-      responses = this.<Object>broadDispatch(action, REQUEST_OPTIONS_BLOCKING);
+      RequestOptions options = new RequestOptions()
+          .setFlags(JGROUPS_FLAGS)
+          .setMode(ResponseMode.GET_ALL)
+          .setTimeout(timeout);
+      responses = this.<Object>broadDispatch(action, options);
     } catch (Exception e) {
       throw new VertxException(e);
     }

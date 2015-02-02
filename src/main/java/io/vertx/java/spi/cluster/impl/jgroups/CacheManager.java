@@ -73,7 +73,7 @@ public class CacheManager extends ReceiverAdapter implements LambdaLogger {
     executorService.remoteExecute(RpcServerObjDelegate.CALL_MAP_CREATE.method(name),
         (result) -> {
           if (result.succeeded()) {
-            AsyncMapWrapper<K, V> wrapper = new AsyncMapWrapper<K, V>(name, maps.<String, Map<K, V>>get(name), vertx, executorService);
+            AsyncMapWrapper<K, V> wrapper = new AsyncMapWrapper<K, V>(name, maps.<String, Map<K, V>>get(name), executorService);
             handler.handle(Future.succeededFuture(wrapper));
           } else {
             handler.handle(Future.failedFuture(result.cause()));
