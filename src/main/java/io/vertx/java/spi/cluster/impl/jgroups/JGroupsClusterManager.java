@@ -139,7 +139,7 @@ public class JGroupsClusterManager implements ClusterManager, LambdaLogger {
 
         address = channel.getAddressAsString();
 
-        if(LOG.isInfoEnabled()) {
+        if (LOG.isInfoEnabled()) {
           LOG.info(String.format("Node id [%s] join the cluster", this.getNodeID()));
         }
 
@@ -165,7 +165,7 @@ public class JGroupsClusterManager implements ClusterManager, LambdaLogger {
       }
       active = false;
 
-      if(LOG.isInfoEnabled()) {
+      if (LOG.isInfoEnabled()) {
         LOG.info(String.format("Node id [%s] leave the cluster", this.getNodeID()));
       }
 

@@ -24,12 +24,12 @@ public class DefaultRpcMultiMapService implements RpcMultiMapService, LambdaLogg
     MultiMapImpl map = Optional
         .ofNullable(maps.get(name))
         .orElseThrow(() -> new IllegalStateException(String.format("MultiMapImpl [%s] not found.", name)));
-    return function.apply((MultiMapImpl<K, V>)map);
+    return function.apply((MultiMapImpl<K, V>) map);
   }
 
   public <K, V> MultiMapImpl<K, V> multiMapGet(String name) {
     logDebug(() -> String.format("method multiMapGet name[%s]", name));
-    return this.<K, V, MultiMapImpl<K,V>>executeAndReturn(name, Function.identity());
+    return this.<K, V, MultiMapImpl<K, V>>executeAndReturn(name, Function.identity());
   }
 
   public boolean multiMapCreate(String name) {

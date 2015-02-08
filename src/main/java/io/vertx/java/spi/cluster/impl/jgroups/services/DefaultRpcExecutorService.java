@@ -23,8 +23,8 @@ import java.util.stream.Collectors;
 public class DefaultRpcExecutorService implements RpcExecutorService, LambdaLogger {
 
   private static final Logger LOG = LoggerFactory.getLogger(DefaultRpcExecutorService.class);
-//  private static final RequestOptions REQUEST_OPTIONS_BLOCKING = new RequestOptions().setFlags(Message.Flag.NO_TOTAL_ORDER).setMode(ResponseMode.GET_ALL);
-  private static final Message.Flag[] JGROUPS_FLAGS = new Message.Flag[] {Message.Flag.NO_TOTAL_ORDER};
+  //  private static final RequestOptions REQUEST_OPTIONS_BLOCKING = new RequestOptions().setFlags(Message.Flag.NO_TOTAL_ORDER).setMode(ResponseMode.GET_ALL);
+  private static final Message.Flag[] JGROUPS_FLAGS = new Message.Flag[]{Message.Flag.NO_TOTAL_ORDER};
 
   private final VertxSPI vertx;
   private final RpcDispatcher dispatcher;

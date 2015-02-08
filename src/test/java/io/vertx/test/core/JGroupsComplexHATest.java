@@ -21,9 +21,9 @@ import io.vertx.java.spi.cluster.impl.jgroups.JGroupsClusterManager;
 
 public class JGroupsComplexHATest extends ComplexHATest {
 
-    @Override
-    protected ClusterManager getClusterManager() {
-        return new JGroupsClusterManager();
-    }
+  @Override
+  protected ClusterManager getClusterManager() {
+    return new JGroupsClusterManager();
+  }
 
 }

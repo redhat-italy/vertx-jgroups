@@ -17,12 +17,13 @@
 package io.vertx.java.spi.cluster.impl.jgroups.domain;
 
 import io.vertx.core.spi.cluster.ChoosableIterable;
+import org.jgroups.util.Streamable;
 
 import java.io.*;
 import java.util.Collections;
 import java.util.Iterator;
 
-public interface ImmutableChoosableSet<T> extends Externalizable, ChoosableIterable<T> {
+public interface ImmutableChoosableSet<T> extends Streamable, Externalizable, ChoosableIterable<T> {
 
   ImmutableChoosableSet<T> add(T value);
 
@@ -32,8 +33,12 @@ public interface ImmutableChoosableSet<T> extends Externalizable, ChoosableItera
 
   ImmutableChoosableSet<T> tail();
 
+  public static final ImmutableChoosableSet emptySet = new EmptyImmutableChoosableSet();
 
-  public static final ImmutableChoosableSet emptySet = new ImmutableChoosableSet() {
+  public class EmptyImmutableChoosableSet implements ImmutableChoosableSet {
+
+    public EmptyImmutableChoosableSet() {
+    }
 
     @Override
     public ImmutableChoosableSet add(Object value) {
@@ -83,5 +88,13 @@ public interface ImmutableChoosableSet<T> extends Externalizable, ChoosableItera
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
     }
-  };
+
+    @Override
+    public void writeTo(DataOutput out) throws Exception {
+    }
+
+    @Override
+    public void readFrom(DataInput in) throws Exception {
+    }
+  }
 }

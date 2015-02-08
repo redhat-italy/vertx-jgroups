@@ -16,10 +16,9 @@
 
 package io.vertx.java.spi.cluster.impl.jgroups.domain;
 
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.util.Collections;
+import org.jgroups.util.Util;
+
+import java.io.*;
 import java.util.Iterator;
 
 public class ImmutableChoosableSetImpl<T> implements ImmutableChoosableSet<T> {
@@ -127,22 +126,31 @@ public class ImmutableChoosableSetImpl<T> implements ImmutableChoosableSet<T> {
 
   @Override
   public void writeExternal(ObjectOutput out) throws IOException {
-    out.writeObject(value);
-    if (next.isEmpty()) {
-      out.writeObject(null);
-    } else {
-      out.writeObject(next);
+    try {
+      writeTo(out);
+    } catch (Exception e) {
+      throw new IOException(e.getMessage(), e);
     }
   }
 
   @Override
   public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-    value = (T) in.readObject();
-    Object tail = in.readObject();
-    if (tail == null) {
-      next = ImmutableChoosableSet.emptySet;
-    } else {
-      next = (ImmutableChoosableSet<T>) tail;
+    try {
+      readFrom(in);
+    } catch (Exception e) {
+      throw new IOException(e.getMessage(), e);
     }
+  }
+
+  @Override
+  public void writeTo(DataOutput out) throws Exception {
+    Util.writeObject(value, out);
+    Util.writeObject(next, out);
+  }
+
+  @Override
+  public void readFrom(DataInput in) throws Exception {
+    value = (T) Util.readObject(in);
+    next = (ImmutableChoosableSet<T>) Util.readObject(in);
   }
 }
