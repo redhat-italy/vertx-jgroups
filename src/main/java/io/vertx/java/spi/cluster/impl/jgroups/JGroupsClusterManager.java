@@ -41,6 +41,16 @@ public class JGroupsClusterManager implements ClusterManager, LambdaLogger {
   private String address;
   private TopologyListener topologyListener;
 
+  private final String jgroupsConfigurationFile;
+
+  public JGroupsClusterManager() {
+    this("jgroups-udp.xml");
+  }
+
+  public JGroupsClusterManager(String jgroupsConfigurationFile) {
+    this.jgroupsConfigurationFile = jgroupsConfigurationFile;
+  }
+
   @Override
   public void setVertx(VertxSPI vertx) {
     this.vertx = vertx;
@@ -132,7 +142,7 @@ public class JGroupsClusterManager implements ClusterManager, LambdaLogger {
       active = true;
 
       try {
-        channel = new JChannel("jgroups-udp.xml");
+        channel = new JChannel(jgroupsConfigurationFile);
         topologyListener = new TopologyListener(vertx);
         channel.setReceiver(topologyListener);
         channel.connect(CLUSTER_NAME);
