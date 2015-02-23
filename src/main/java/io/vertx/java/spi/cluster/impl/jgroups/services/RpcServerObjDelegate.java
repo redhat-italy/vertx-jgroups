@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2011-2013 The original author or authors
+ * ------------------------------------------------------
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * and Apache License v2.0 which accompanies this distribution.
+ *
+ *     The Eclipse Public License is available at
+ *     http://www.eclipse.org/legal/epl-v10.html
+ *
+ *     The Apache License v2.0 is available at
+ *     http://www.opensource.org/licenses/apache2.0.php
+ *
+ * You may elect to redistribute this code under either of these licenses.
+ */
+
 package io.vertx.java.spi.cluster.impl.jgroups.services;
 
 import io.vertx.core.logging.Logger;
@@ -32,7 +48,6 @@ public class RpcServerObjDelegate implements RpcMapService, RpcMultiMapService, 
   private static final short MAP_REPLACEIFPRESENT = 26;
   private static final short MAP_CLEAR = 27;
   private static final short MAP_PUTALL = 28;
-  private static final short MAP_PUT_TIMEOUT = 29;
 
   public static final MethodCallInterface.OneParameter CALL_MULTIMAP_CREATE = (name) -> new MethodCall(MULTIMAP_CREATE, name);
   public static final MethodCallInterface.ThreeParameters CALL_MULTIMAP_ADD = (name, p1, p2) -> new MethodCall(MULTIMAP_ADD, name, DataHolder.wrap(p1), DataHolder.wrap(p2));

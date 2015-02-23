@@ -48,18 +48,18 @@ public class TopologyListener extends ReceiverAdapter implements LambdaLogger {
 
   @Override
   public void receive(Message msg) {
-    System.out.println("Message receive [" + msg + "]");
+    logTrace(() -> String.format("Message receive [%s]", msg));
   }
 
   @Override
   public void viewAccepted(View view) {
     if (view.getViewId() == null) {
-      logTrace(() -> "Called View accepted [" + view + "] with ViewId null.");
+      logTrace(() -> String.format("Called View accepted [%s] with ViewId null.", view));
       return;
     }
 
     if (viewId != null && view.getViewId().compareToIDs(viewId) <= 0) {
-      logTrace(() -> "Called View accepted [" + view + "] but there's no changes.");
+      logTrace(() -> String.format("Called View accepted [%s] but there's no changes.", view));
       return;
     }
 
@@ -74,11 +74,11 @@ public class TopologyListener extends ReceiverAdapter implements LambdaLogger {
       Predicate<Address> oldMemberNodeHasLeft = (member) -> !newMembers.contains(member);
       Predicate<Address> newMemberNodeJoin = (member) -> !oldMembers.contains(member);
       Consumer<Address> nodeJoin = (member) -> {
-        logInfo(() -> "Notify node [" + member + "] has joined the cluster");
+        logInfo(() -> String.format("Notify node [%s] has joined the cluster", member));
         listener.nodeAdded(member.toString());
       };
       Consumer<Address> nodeLeft = (member) -> {
-        logInfo(() -> "Notify node [" + member + "] has left the cluster");
+        logInfo(() -> String.format("Notify node [%s] has left the cluster", member));
         listener.nodeLeft(member.toString());
       };
 
@@ -94,12 +94,12 @@ public class TopologyListener extends ReceiverAdapter implements LambdaLogger {
   }
 
   public void setNodeListener(NodeListener nodeListener) {
-    logDebug(() -> "Set topology listener [" + nodeListener + "]");
+    logTrace(() -> String.format("Set topology listener [%s]", nodeListener));
     this.nodeListener = Optional.of(nodeListener);
   }
 
   public List<String> getNodes() {
-    logDebug(() -> "Get Nodes from topology [" + members + "]");
+    logTrace(() -> String.format("Get Nodes from topology [%s]", members));
     return members
         .stream()
         .map(Address::toString)

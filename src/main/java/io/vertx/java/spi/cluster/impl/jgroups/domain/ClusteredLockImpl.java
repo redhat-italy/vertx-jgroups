@@ -18,14 +18,15 @@ package io.vertx.java.spi.cluster.impl.jgroups.domain;
 
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.impl.LoggerFactory;
+import io.vertx.java.spi.cluster.impl.jgroups.support.LambdaLogger;
 import org.jgroups.blocks.locking.LockService;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
-public class ClusteredLockImpl implements io.vertx.core.shareddata.Lock {
+public class ClusteredLockImpl implements io.vertx.core.shareddata.Lock, LambdaLogger {
 
-  private final static Logger log = LoggerFactory.getLogger(ClusteredLockImpl.class);
+  private final static Logger LOG = LoggerFactory.getLogger(ClusteredLockImpl.class);
   private final Lock lock;
 
   public ClusteredLockImpl(LockService lockService, String name) {
@@ -34,9 +35,7 @@ public class ClusteredLockImpl implements io.vertx.core.shareddata.Lock {
 
   public boolean acquire(long timeout) {
     try {
-      if (log.isDebugEnabled()) {
-        log.debug(String.format("Acquire lock on [%s] with timeout [%d]", lock, timeout));
-      }
+      logDebug(() -> String.format("Acquire lock on [%s] with timeout [%d]", lock, timeout));
       return lock.tryLock(timeout, TimeUnit.MILLISECONDS);
     } catch (InterruptedException e) {
     }
@@ -46,5 +45,10 @@ public class ClusteredLockImpl implements io.vertx.core.shareddata.Lock {
   @Override
   public void release() {
     lock.unlock();
+  }
+
+  @Override
+  public Logger log() {
+    return LOG;
   }
 }

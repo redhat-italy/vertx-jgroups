@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2011-2013 The original author or authors
+ * ------------------------------------------------------
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * and Apache License v2.0 which accompanies this distribution.
+ *
+ *     The Eclipse Public License is available at
+ *     http://www.eclipse.org/legal/epl-v10.html
+ *
+ *     The Apache License v2.0 is available at
+ *     http://www.opensource.org/licenses/apache2.0.php
+ *
+ * You may elect to redistribute this code under either of these licenses.
+ */
+
 package io.vertx.java.spi.cluster.impl.jgroups;
 
 import io.vertx.core.AsyncResult;
@@ -55,7 +71,7 @@ public class CacheManager extends ReceiverAdapter implements LambdaLogger {
   }
 
   public <K, V> void createAsyncMultiMap(String name, Handler<AsyncResult<AsyncMultiMap<K, V>>> handler) {
-    logDebug(() -> String.format("method createAsyncMultiMap address[%s] name[%s]", channel.getAddressAsString(), name));
+    logTrace(() -> String.format("method createAsyncMultiMap address[%s] name[%s]", channel.getAddressAsString(), name));
     executorService.remoteExecute(RpcServerObjDelegate.CALL_MULTIMAP_CREATE.method(name),
         (result) -> {
           logDebug(() -> String.format("method created AsyncMultiMap address[%s] name[%s]", channel.getAddressAsString(), name));
@@ -69,7 +85,7 @@ public class CacheManager extends ReceiverAdapter implements LambdaLogger {
   }
 
   public <K, V> void createAsyncMap(String name, Handler<AsyncResult<AsyncMap<K, V>>> handler) {
-    logDebug(() -> String.format("method createAsyncMap address[%s] name[%s]", channel.getAddressAsString(), name));
+    logTrace(() -> String.format("method createAsyncMap address[%s] name[%s]", channel.getAddressAsString(), name));
     executorService.remoteExecute(RpcServerObjDelegate.CALL_MAP_CREATE.method(name),
         (result) -> {
           if (result.succeeded()) {
@@ -92,9 +108,7 @@ public class CacheManager extends ReceiverAdapter implements LambdaLogger {
 
   @Override
   public void getState(OutputStream output) throws Exception {
-    if (LOG.isTraceEnabled()) {
-      LOG.trace("CacheManager create state");
-    }
+    logTrace(() -> "CacheManager get state");
     try (BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(output, 1024);
          ObjectOutputStream oos = new ObjectOutputStream(bufferedOutputStream)) {
       oos.writeObject(multiMaps);
@@ -105,9 +119,7 @@ public class CacheManager extends ReceiverAdapter implements LambdaLogger {
 
   @Override
   public void setState(InputStream input) throws Exception {
-    if (LOG.isTraceEnabled()) {
-      LOG.trace(String.format("CacheManager.setState with input [%s]", input));
-    }
+    logTrace(() -> "CacheManager set state");
     try (ObjectInputStream oos = new ObjectInputStream(input)) {
       multiMaps.putAll((Map<String, MultiMapImpl>) oos.readObject());
       maps.putAll((Map<String, Map>) oos.readObject());
